@@ -1,27 +1,26 @@
-FROM ubuntu:22.04
+FROM debian:bookworm-slim AS builder
 
-ENV HERMES_VERSION=1.10.0
-ENV DEBIAN_FRONTEND=noninteractive
-
-# 安装最小依赖 (加入了 curl)
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
+    git \
     curl \
+    build-essential \
+    ca-certificates \
+    tar \
+    gzip \
     && rm -rf /var/lib/apt/lists/*
 
-# 下载 Hermes 官方预编译二进制
-RUN curl -L -o hermes.tar.gz \
-    "https://github.com/informalsystems/hermes/releases/download/v${HERMES_VERSION}/hermes-v${HERMES_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
-    && tar -xzvf hermes.tar.gz \
-    && mv hermes /usr/local/bin/hermes \
-    && chmod +x /usr/local/bin/hermes \
-    && rm hermes.tar.gz
+RUN curl -fsSL -o /tmp/hermes.tar.gz \
+    "https://github.com/informalsystems/hermes/releases/download/v1.10.0/hermes-v1.10.0-x86_64-unknown-linux-gnu.tar.gz" \
+    && tar -xzf /tmp/hermes.tar.gz -C /tmp \
+    && mv /tmp/hermes /usr/local/bin/hermes \
+    && chmod +x /usr/local/bin/hermes
 
-# 创建配置目录
-RUN mkdir -p /root/.hermes
+FROM debian:bookworm-slim
 
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root/.hermes
-CMD ["/start.sh"]
+COPY --from=builder /usr/local/bin/hermes /usr/local/bin/hermes
+
+RUN hermes version
