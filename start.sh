@@ -1,12 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-# Railway 会提供 PORT 环境变量
-export PORT=${PORT:-3000}
-
-# 这里替换成 Hermes 官方启动命令
-# 示例：
-# hermes --host 0.0.0.0 --port $PORT
-
-echo "Starting Hermes on port $PORT..."
-hermes --host 0.0.0.0 --port $PORT
+if [ ! -f "/root/.hermes/config.toml" ]; then
+    echo "❌ 未找到 config.toml 文件！"
+    echo "请通过 Railway Volume 或 Railway Shell 上传你的配置文件和密钥。"
+    tail -f /dev/null
+else
+    echo "🚀 启动 Hermes v$(hermes version)..."
+    exec hermes --config /root/.hermes/config.toml start
+fi
