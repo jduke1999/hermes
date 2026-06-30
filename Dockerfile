@@ -1,27 +1,25 @@
-FROM debian:bookworm-slim AS builder
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    build-essential \
     ca-certificates \
+    curl \
     tar \
-    gzip \
     && rm -rf /var/lib/apt/lists/*
-RUN apt-get update && apt-get install -y curl ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
-RUN curl -fsSL -o /tmp/hermes.tar.gz \
-    "https://github.com/informalsystems/hermes/releases/download/v1.10.0/hermes-v1.10.0-x86_64-unknown-linux-gnu.tar.gz" \
+
+ENV HERMES_VERSION=1.10.0
+
+RUN curl -L -o /tmp/hermes.tar.gz \
+    "https://github.com/informalsystems/hermes/releases/download/v${HERMES_VERSION}/hermes-v${HERMES_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
     && tar -xzf /tmp/hermes.tar.gz -C /tmp \
     && mv /tmp/hermes /usr/local/bin/hermes \
-    && chmod +x /usr/local/bin/hermes
+    && chmod +x /usr/local/bin/hermes \
+    && rm -rf /tmp/hermes.tar.gz /tmp/hermes
 
-FROM debian:bookworm-slim
+WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
-COPY --from=builder /usr/local/bin/hermes /usr/local/bin/hermes
-
-RUN hermes version
+CMD ["/app/start.sh"]
