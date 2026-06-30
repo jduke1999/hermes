@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     tar \
     gzip \
     && rm -rf /var/lib/apt/lists/*
-
+RUN apt-get update && apt-get install -y curl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL -o /tmp/hermes.tar.gz \
     "https://github.com/informalsystems/hermes/releases/download/v1.10.0/hermes-v1.10.0-x86_64-unknown-linux-gnu.tar.gz" \
     && tar -xzf /tmp/hermes.tar.gz -C /tmp \
