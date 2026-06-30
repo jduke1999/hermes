@@ -3,9 +3,10 @@ FROM ubuntu:22.04
 ENV HERMES_VERSION=1.10.0
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 安装最小依赖
+# 安装最小依赖 (加入了 curl)
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载 Hermes 官方预编译二进制
